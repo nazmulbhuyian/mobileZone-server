@@ -59,21 +59,21 @@ async function run(){
             res.send(result);
         })
 
-        // app.post('/users', async(req, res) =>{
-        //     const user = req.body;
-        //     const inserted = await usersCollection.findOne({email: user.email})
-        //     if(inserted){
-        //         return res.send({message: 'Previously Added'})
-        //     }
-        //     const result = await usersCollection.insertOne(user);
-        //     res.send(result);
-        // })
-
-        app.get('/users', async(req, res) =>{
-            const query = {}
-            const users = await usersCollection.find(query).toArray();
-            res.send(users);
+        app.post('/users', async(req, res) =>{
+            const user = req.body;
+            const inserted = await usersCollection.findOne({email: user.email})
+            if(inserted){
+                return res.send({message: 'Previously Added'})
+            }
+            const result = await usersCollection.insertOne(user);
+            res.send(result);
         })
+
+        // app.get('/users', async(req, res) =>{
+        //     const query = {}
+        //     const users = await usersCollection.find(query).toArray();
+        //     res.send(users);
+        // })
 
         app.put('/users/admin/:id', async(req, res) =>{
             const id = req.params.id
