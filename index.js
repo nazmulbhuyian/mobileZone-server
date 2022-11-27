@@ -3,12 +3,32 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 5000;
 require('dotenv').config();
+const jwt =  require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 app.use(express.json())
 app.use(cors())
 
+
+function verifyJWT (req, res, next){
+    const authHeader = req.headers.authorization
+    if(!authHeader){
+        return res.status(401).send('UnAuthoriged Access')
+    }
+
+    const token = authHeader.split(' ')[1];
+    // console.log(token, authHeader);
+
+    jwt.verify(token, process.env.ACCESS_TOKEN, function(err, decoded){
+        if(err){
+            // console.log(err);
+            return res.status(403).send({message: 'Forbidden Access'})
+        }
+        req.decoded = decoded;
+        next();
+    })
+}
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.p8qnexq.mongodb.net/?retryWrites=true&w=majority`;
@@ -25,12 +45,12 @@ async function run(){
         const allCollection = client.db('bikeZone').collection('all')
 
 
-        app.get('/catagories', async(req, res) =>{
-            const query = {};
-            const result = await allPhoneCatagories.find(query).toArray();
-            // console.log(query);
-            res.send(result);
-        })
+        // app.get('/catagories', async(req, res) =>{
+        //     const query = {};
+        //     const result = await allPhoneCatagories.find(query).toArray();
+        //     // console.log(query);
+        //     res.send(result);
+        // })
 
         app.get('/catagories/:id', async(req, res) =>{
             const id = req.params.id;
@@ -105,7 +125,7 @@ async function run(){
             res.send(result)    
         })
 
-        app.get('/bookings', async(req, res) =>{
+        app.get('/bookings', verifyJWT, async(req, res) =>{
             const email = req.query.email;
             // const decodedEmail = req.decoded.email;
 
@@ -118,7 +138,7 @@ async function run(){
             res.send(bookings);
         })
 
-        app.post('/addProduct', async(req, res) =>{
+        app.post('/addProduct', verifyJWT, async(req, res) =>{
             const currentCatagory = await productsCollection.findOne({catagory_id: req.body.catagory_id})
             const newProducts = [...currentCatagory.collections, req.body]
             const updayedDoc = {
@@ -132,14 +152,14 @@ async function run(){
             res.send(result);
         })
 
-        app.post('/wishlists', async(req, res) =>{
+        app.post('/wishlists', verifyJWT, async(req, res) =>{
             const wishlists = req.body;
             const result= await wishlistsCollection.insertOne(wishlists);
             // res.send({acknowledge: true, message: `You booking is successful on ${booking.appointmentDate}`})
             res.send(result)    
         })
 
-        app.get('/wishlists', async(req, res) =>{
+        app.get('/wishlists', verifyJWT, async(req, res) =>{
             const email = req.query.email;
             // const decodedEmail = req.decoded.email;
 
@@ -180,11 +200,23 @@ async function run(){
             res.send(myProduct);
         })
 
-        app.delete('/wishlist/:id', async(req, res) =>{
+        app.delete('/wishlist/:id', verifyJWT, async(req, res) =>{
             const id = req.params.id;
             const filter = {_id:  ObjectId(id)}
             const result = await wishlistsCollection.deleteOne(filter);
             res.send(result);
+        })
+
+        app.get('/jwt', async(req, res) =>{
+            const email = req.query.email;
+            const query = {email: email}
+            const user = await usersCollection.findOne(query);
+            if(user){
+                const token = jwt.sign({email}, process.env.ACCESS_TOKEN) //, {expiresIn: '1h'}
+                // console.log(token);
+                return res.send({accessToken: token})
+            }
+            res.status(403).send({accessToken: ''})
         })
 
     }
