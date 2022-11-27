@@ -45,19 +45,19 @@ async function run(){
         const allCollection = client.db('bikeZone').collection('all')
 
 
-        // app.get('/catagories', async(req, res) =>{
-        //     const query = {};
-        //     const result = await allPhoneCatagories.find(query).toArray();
-        //     // console.log(query);
-        //     res.send(result);
-        // })
-
-        app.get('/catagories/:id', async(req, res) =>{
-            const id = req.params.id;
-            const query = {catagory_id: id}
-            const result = await productsCollection.find(query).toArray();
+        app.get('/catagories', async(req, res) =>{
+            const query = {};
+            const result = await allPhoneCatagories.find(query).toArray();
+            // console.log(query);
             res.send(result);
         })
+
+        // app.get('/catagories/:id', async(req, res) =>{
+        //     const id = req.params.id;
+        //     const query = {catagory_id: id}
+        //     const result = await productsCollection.find(query).toArray();
+        //     res.send(result);
+        // })
 
         app.post('/users', async(req, res) =>{
             const user = req.body;
