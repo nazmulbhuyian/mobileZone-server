@@ -21,6 +21,8 @@ async function run(){
         const bookingsCollection = client.db('bikeZone').collection('bookings')
         const productsCollection = client.db('bikeZone').collection('products')
         const wishlistsCollection = client.db('bikeZone').collection('wishlists')
+        const AdvertisedCollection = client.db('bikeZone').collection('advertised')
+        const allCollection = client.db('bikeZone').collection('all')
 
 
         app.get('/catagories', async(req, res) =>{
@@ -74,11 +76,11 @@ async function run(){
         })
 
 
-        app.get('/users/bayer/:email', async(req, res) =>{
+        app.get('/users/seller/:email', async(req, res) =>{
             const email = req.params.email;
             const query = {email}
             const user = await usersCollection.findOne(query)
-            res.send({isSeller: user?.role === 'seller'})
+            res.send({isSeller: user?.role === 'seller' || user?.role === 'admin'})
         })
 
         app.post('/bookings', async(req, res) =>{
@@ -99,7 +101,6 @@ async function run(){
             // }
 
             const result= await bookingsCollection.insertOne(booking);
-            
             // res.send({acknowledge: true, message: `You booking is successful on ${booking.appointmentDate}`})
             res.send(result)    
         })
@@ -126,22 +127,13 @@ async function run(){
                 }
             }
             const result = await productsCollection.updateOne({catagory_id: req.body.catagory_id}, updayedDoc)
+            const allTime = req.body;
+            const all = await allCollection.insertOne(allTime)
             res.send(result);
         })
 
         app.post('/wishlists', async(req, res) =>{
             const wishlists = req.body;
-            // const query = {
-            //     appointmentDate: booking.appointmentDate,
-            //     email: booking.email,
-            //     treatment: booking.treatment
-            // }
-            // const alreadyBooked = await bookingsCollection.find(query).toArray();
-            // // console.log(alreadyBooked);
-            // if(alreadyBooked.length >= 1){
-            //     const message = `You already have a booking on ${booking.appointmentDate}`
-            //     return res.send({acknowledge: false, message})
-            // }
             const result= await wishlistsCollection.insertOne(wishlists);
             // res.send({acknowledge: true, message: `You booking is successful on ${booking.appointmentDate}`})
             res.send(result)    
@@ -160,19 +152,40 @@ async function run(){
             res.send(bookings);
         })
 
+        
+        app.post('/advertised', async(req, res) =>{
+            const advertised = req.body;
+            const result= await AdvertisedCollection.insertOne(advertised);
+            // res.send({acknowledge: true, message: `You booking is successful on ${booking.appointmentDate}`})
+            res.send(result)    
+        })
 
-        // app.get('/myproducts', async(req, res) =>{
-        //     const email = req.query.email;
-        //     // const decodedEmail = req.decoded.email;
+        app.get('/advertised', async(req, res) =>{
+            const query = {};
+            const bookings = await AdvertisedCollection.find(query).toArray();
+            res.send(bookings);
+        })
 
-        //     // if(decodedEmail !== email){
-        //     //     return res.status(403).send({message: 'Forbidden Access'})
-        //     // }
 
-        //     const query = {email: email};
-        //     const myProduct = await productsCollection.find(query).toArray();
-        //     res.send(myProduct);
-        // })
+        app.get('/myproducts', async(req, res) =>{
+            const email = req.query.email;
+            // const decodedEmail = req.decoded.email;
+
+            // if(decodedEmail !== email){
+            //     return res.status(403).send({message: 'Forbidden Access'})
+            // }
+
+            const query = {email: email};
+            const myProduct = await allCollection.find(query).toArray();
+            res.send(myProduct);
+        })
+
+        app.delete('/wishlist/:id', async(req, res) =>{
+            const id = req.params.id;
+            const filter = {_id:  ObjectId(id)}
+            const result = await wishlistsCollection.deleteOne(filter);
+            res.send(result);
+        })
 
     }
 
