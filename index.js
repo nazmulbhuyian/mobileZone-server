@@ -52,22 +52,22 @@ async function run(){
             res.send(result);
         })
 
-        // app.get('/catagories/:id', async(req, res) =>{
-        //     const id = req.params.id;
-        //     const query = {catagory_id: id}
-        //     const result = await productsCollection.find(query).toArray();
-        //     res.send(result);
-        // })
-
-        app.post('/users', async(req, res) =>{
-            const user = req.body;
-            const inserted = await usersCollection.findOne({email: user.email})
-            if(inserted){
-                return res.send({message: 'Previously Added'})
-            }
-            const result = await usersCollection.insertOne(user);
+        app.get('/catagories/:id', async(req, res) =>{
+            const id = req.params.id;
+            const query = {catagory_id: id}
+            const result = await productsCollection.find(query).toArray();
             res.send(result);
         })
+
+        // app.post('/users', async(req, res) =>{
+        //     const user = req.body;
+        //     const inserted = await usersCollection.findOne({email: user.email})
+        //     if(inserted){
+        //         return res.send({message: 'Previously Added'})
+        //     }
+        //     const result = await usersCollection.insertOne(user);
+        //     res.send(result);
+        // })
 
         app.get('/users', async(req, res) =>{
             const query = {}
