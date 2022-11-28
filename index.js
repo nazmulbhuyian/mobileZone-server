@@ -152,14 +152,14 @@ async function run(){
             res.send(result);
         })
 
-        app.post('/wishlists', verifyJWT, async(req, res) =>{
+        app.post('/wishlists', async(req, res) =>{
             const wishlists = req.body;
             const result= await wishlistsCollection.insertOne(wishlists);
             // res.send({acknowledge: true, message: `You booking is successful on ${booking.appointmentDate}`})
             res.send(result)    
         })
 
-        app.get('/wishlists', verifyJWT, async(req, res) =>{
+        app.get('/wishlists', async(req, res) =>{
             const email = req.query.email;
             // const decodedEmail = req.decoded.email;
 
