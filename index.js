@@ -179,6 +179,14 @@ async function run(){
             res.send(myProduct);
         })
 
+        app.delete('/myproducts/:id', verifyJWT, async(req, res) =>{
+            const id = req.params.id;
+            const filter = {_id:  ObjectId(id)}
+            const result = await allCollection.deleteOne(filter);
+            res.send(result);
+        })
+
+
         app.delete('/wishlist/:id', verifyJWT, async(req, res) =>{
             const id = req.params.id;
             const filter = {_id:  ObjectId(id)}
