@@ -75,6 +75,13 @@ async function run(){
             res.send(users);
         })
 
+        app.delete('/users/admin/:id', async(req, res) =>{
+            const id = req.params.id
+            const query = {_id: ObjectId(id)}
+            const result = await usersCollection.deleteOne(query);
+            res.send(result);
+        })
+
         app.put('/users/admin/:id', async(req, res) =>{
             const id = req.params.id
             const filter = {_id: ObjectId(id)}
@@ -111,12 +118,6 @@ async function run(){
 
         app.get('/bookings', verifyJWT, async(req, res) =>{
             const email = req.query.email;
-            // const decodedEmail = req.decoded.email;
-
-            // if(decodedEmail !== email){
-            //     return res.status(403).send({message: 'Forbidden Access'})
-            // }
-
             const query = {email: email};
             const bookings = await bookingsCollection.find(query).toArray();
             res.send(bookings);
@@ -173,12 +174,6 @@ async function run(){
 
         app.get('/myproducts', async(req, res) =>{
             const email = req.query.email;
-            // const decodedEmail = req.decoded.email;
-
-            // if(decodedEmail !== email){
-            //     return res.status(403).send({message: 'Forbidden Access'})
-            // }
-
             const query = {email: email};
             const myProduct = await allCollection.find(query).toArray();
             res.send(myProduct);
